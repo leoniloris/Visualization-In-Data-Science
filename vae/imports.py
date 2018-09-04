@@ -1,4 +1,6 @@
+import keras
 from keras.layers import *
+from keras.layers.merge import concatenate
 from keras.models import load_model
 from keras import regularizers
 from keras.models import Model
@@ -19,3 +21,6 @@ import importlib
 importlib.reload(plot)
 
 import numpy as np
+
+import ipywidgets as widgets
+from ipywidgets import interact, FloatSlider
