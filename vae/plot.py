@@ -4,13 +4,14 @@ import matplotlib.cm as cm
 import keras
 
 class Plot(keras.callbacks.Callback):
-    def __init__(self, test_data, test_target, encoder, decoder, model_name='AE', full_model=None):
+    def __init__(self, test_data, test_target, encoder, decoder, model_name='AE', full_model=None, plots=True):
         self.test_data = test_data
         self.test_target = test_target
         self.encoder = encoder
         self.decoder = decoder
         self.epoch = 0
         self.model_name = model_name
+        self.plots = plots
         if model_name == 'VAE':
             self.full_model = full_model
 
@@ -21,7 +22,7 @@ class Plot(keras.callbacks.Callback):
         n_images = 6
         f, axs = plt.subplots(2, n_images, figsize=(16, 5), num=1)
         for i in range(n_images):
-            axs[0, i].imshow(data[i].reshape(28, 28))          
+            axs[0, i].imshow(data[i].reshape(28, 28))
             axs[1, i].imshow(self.test_data[i].reshape(28, 28))
         if save_figure:
             plt.savefig('images/%sbatch-%d_ecpoch-%d_reconstruction.png' % (self.model_name, batch, self.epoch))
@@ -66,7 +67,7 @@ class Plot(keras.callbacks.Callback):
     def on_batch_end(self, batch, logs=None):
         PLOT_PERIOD = 30
         save_figure = True if batch % (2 * PLOT_PERIOD) == 0 else False
-        if batch % PLOT_PERIOD == 0:
+        if batch % PLOT_PERIOD == 0 and self.plots:
         # if False:
             clear_output(wait=True)
             
