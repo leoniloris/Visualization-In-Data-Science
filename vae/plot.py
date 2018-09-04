@@ -1,19 +1,24 @@
 import matplotlib.pyplot as plt
 from IPython.display import clear_output
+import numpy as np
+import os
 import matplotlib.cm as cm
 import keras
 
 class Plot(keras.callbacks.Callback):
     def __init__(self, test_data, test_target, encoder, decoder, model_name='AE', full_model=None, plots=True):
-        self.test_data = test_data
         self.test_target = test_target
         self.encoder = encoder
         self.decoder = decoder
         self.epoch = 0
         self.model_name = model_name
         self.plots = plots
+        self.test_data = test_data
         if model_name == 'VAE':
             self.full_model = full_model
+        elif self.model_name == 'COND':
+            self.test_data , self.constraint = self.test_data    
+        self.test_labels = np.argmax(self.test_target, axis=1)
 
     def on_epoch_end(self, epoch, logs=None):
         self.epoch = epoch
@@ -35,7 +40,7 @@ class Plot(keras.callbacks.Callback):
         fig = plt.figure(num=2, figsize=(16, 8))
         ax1 = fig.add_subplot(1, 2, 1)
         ax1.scatter(projected_PCA[:, 0], projected_PCA[:, 1],
-                       c=self.test_target, edgecolor='none', alpha=0.5,
+                       c=self.test_labels, edgecolor='none', alpha=0.5,
                        cmap=plt.cm.get_cmap('nipy_spectral', 10))
         ax1.set_title('PCA Scatter Plot')
 
@@ -43,7 +48,7 @@ class Plot(keras.callbacks.Callback):
         projected_ICA = ica.fit_transform(data)
         ax2 = fig.add_subplot(1, 2, 2)
         ax = ax2.scatter(projected_ICA[:, 0], projected_ICA[:, 1],
-                    c=self.test_target, edgecolor='none', alpha=0.5,
+                    c=self.test_labels, edgecolor='none', alpha=0.5,
                     cmap=plt.cm.get_cmap('nipy_spectral', 10))
         fig.colorbar(ax)
         ax2.set_title('ICA Scatter Plot')
@@ -55,7 +60,7 @@ class Plot(keras.callbacks.Callback):
         if data.shape[-1] == 2:
             plt.figure(figsize = (17, 5), num=3)
             plt.scatter(data[:, 0], data[:, 1],
-                        c=self.test_target, edgecolor='none', alpha=0.5,
+                        c=self.test_labels, edgecolor='none', alpha=0.5,
                         cmap=plt.cm.get_cmap('nipy_spectral', 10))
             
             plt.colorbar()
@@ -76,6 +81,11 @@ class Plot(keras.callbacks.Callback):
                 decoded_imgs = self.full_model.predict(self.test_data[:100])
                 self._plot_lattent(z_mean, save_figure=save_figure, batch=batch)
                 self._plot_reconstruction(decoded_imgs, save_figure=save_figure, batch=batch)
+            elif self.model_name == 'COND':
+                encoded_imgs = self.encoder.predict([self.test_data, self.constraint])
+                decoded_imgs = self.decoder.predict(np.concatenate((encoded_imgs, self.constraint), axis=-1))
+                self._plot_lattent(encoded_imgs, save_figure=save_figure, batch=batch)
+                self._plot_reconstruction(decoded_imgs, save_figure=save_figure, batch=batch)
             else:
                 encoded_imgs = self.encoder.predict(self.test_data)
                 decoded_imgs = self.decoder.predict(encoded_imgs)
@@ -87,13 +97,7 @@ def plot_results(models,
                  data,
                  batch_size=128,
                  model_name="vae_mnist"):
-    """Plots labels and MNIST digits as function of 2-dim latent vector
-    # Arguments:
-        models (tuple): encoder and decoder models
-        data (tuple): test data and label
-        batch_size (int): prediction batch size
-        model_name (string): which model is using this function
-    """
+
     encoder, decoder = models
     x_test, y_test = data
     os.makedirs(model_name, exist_ok=True)
@@ -102,7 +106,7 @@ def plot_results(models,
     # display a 2D plot of the digit classes in the latent space
     z_mean, _, _ = encoder.predict(x_test,
                                    batch_size=batch_size)
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(20, 10))
     plt.scatter(z_mean[:, 0], z_mean[:, 1], c=y_test)
     plt.colorbar()
     plt.xlabel("z[0]")
@@ -112,7 +116,7 @@ def plot_results(models,
 
     filename = os.path.join(model_name, "digits_over_latent.png")
     # display a 30x30 2D manifold of digits
-    n = 30
+    n = 20
     digit_size = 28
     figure = np.zeros((digit_size * n, digit_size * n))
     # linearly spaced coordinates corresponding to the 2D plot
