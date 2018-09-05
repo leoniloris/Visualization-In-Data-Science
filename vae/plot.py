@@ -17,8 +17,11 @@ class Plot(keras.callbacks.Callback):
         if model_name == 'VAE':
             self.full_model = full_model
         elif self.model_name == 'COND':
-            self.test_data , self.constraint = self.test_data    
-        self.test_labels = np.argmax(self.test_target, axis=1)
+            self.test_data , self.constraint = self.test_data 
+        if len(self.test_target.shape) > 1:
+            self.test_labels = np.argmax(self.test_target, axis=1)
+        else:
+            self.test_labels = self.test_target
 
     def on_epoch_end(self, epoch, logs=None):
         self.epoch = epoch
@@ -72,8 +75,8 @@ class Plot(keras.callbacks.Callback):
     def on_batch_end(self, batch, logs=None):
         PLOT_PERIOD = 30
         save_figure = True if batch % (2 * PLOT_PERIOD) == 0 else False
-        if batch % PLOT_PERIOD == 0 and self.plots:
-        # if False:
+        # if batch % PLOT_PERIOD == 0 and self.plots:
+        if False:
             clear_output(wait=True)
             
             if self.model_name == 'VAE':
