@@ -1,1 +1,12 @@
-"1 - Feature selection and data visualization. - https://www.kaggle.com/kanncaa1/feature-selection-and-data-visualization 2 - Compare our outlier detection method against another outlier detection method (Dbscan or Isolation Forest). - https://towardsdatascience.com/a-brief-overview-of-outlier-detection-techniques-1e0b2c19e561 3 - Compare out outlier detection (unsupervised) method against  a supervised method (Neural Network). - https://www.kaggle.com/mirichoi0218/classification-breast-cancer-or-not-with-15-ml 4 - [Se der tempo] Visualize outliers and compare with PCA or TSNE. - https://www.kaggle.com/sararht13/breast-cancer-analysis-and-diagnosis" 
+1
+ - Feature selection and data visualization.
+ - https://www.kaggle.com/kanncaa1/feature-selection-and-data-visualization 
+ 2
+ - Compare our outlier detection method against another outlier detection method (Dbscan or Isolation Forest).
+ - https://towardsdatascience.com/a-brief-overview-of-outlier-detection-techniques-1e0b2c19e561 
+ 3
+ - Compare out outlier detection (unsupervised) method against  a supervised method (Neural Network).
+ - https://www.kaggle.com/mirichoi0218/classification-breast-cancer-or-not-with-15-ml 
+ 4
+ - [Se der tempo] Visualize outliers and compare with PCA or TSNE.
+ - https://www.kaggle.com/sararht13/breast-cancer-analysis-and-diagnosis
