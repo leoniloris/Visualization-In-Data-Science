@@ -2,13 +2,14 @@ import pandas as pd
 import numpy as np
 import os
 
+np.random.seed(0)
 
-def _preprocess_data(df):
+def preprocess_data(df):
     df /= df.max(axis=0)
     return df
 
 
-def load_database():
+def load_dataset():
     os.system(
         'kaggle datasets download '
         '-d uciml/breast-cancer-wisconsin-data -f data.csv')
@@ -18,23 +19,39 @@ def load_database():
 def create_xy(df, add_columns, target_columns):
     columns = [
         col for col in df.columns if
-        ((col not in target_columns)) and
-        ((add_columns in col) or (add_columns in col))
+        (col not in target_columns and
+        add_columns in col)
     ]
 
     return df[columns], df[target_columns]
 
 
-def split_train_val(x_df, y_df):
-    _x_df = _preprocess_data(x_df.copy())
-    TRAIN_SIZE = int(0.8 * len(_x_df))
-    train_idxs = np.random.choice(_x_df.index, TRAIN_SIZE, replace=False)
-    val_idxs = _x_df.index.drop(train_idxs)
-    x_train = x_df.loc[train_idxs].values
-    y_train = y_df.loc[train_idxs].values
-    print('# Examples for training:', len(x_train))
+def _split_sets(x, y, first_set_perc):
+    first_set_size = int(first_set_perc * len(x))
+    
+    first_set_idxs = np.random.choice(x.index, first_set_size, replace=False)
+    second_set_idxs = x.index.drop(first_set_idxs)
+    
+    x_first_set = x.loc[first_set_idxs]
+    y_first_set = y.loc[first_set_idxs]
+    
+    x_second_set = x.loc[second_set_idxs]
+    y_second_set = y.loc[second_set_idxs]
+    
+    return (x_first_set, y_first_set), (x_second_set, y_second_set)
+    
+    
+def split_train_val_test(x, y, train_perc):
+    x_healthy, y_healthy = x[y.diagnosis == 'B'], y[y.diagnosis == 'B']
+    x_unhealthy, y_unhealthy = x[y.diagnosis == 'M'], y[y.diagnosis == 'M']
+    
+    (x_train, y_train), (x_valtest, y_valtest) = \
+        _split_sets(x_healthy, y_healthy, train_perc)
 
-    x_val = _x_df.loc[val_idxs].values
-    y_val = y_df.loc[val_idxs].values
-    print('# Examples for validation:', len(x_val))
-    return (x_train, y_train), (x_val, y_val)
+    x_valtest = pd.concat([x_valtest, x_unhealthy], ignore_index=True)
+    y_valtest = pd.concat([y_valtest, y_unhealthy], ignore_index=True)
+
+    (x_val, y_val), (x_test, y_test) = \
+        _split_sets(x_valtest, y_valtest, 0.5)
+    
+    return (x_train.values, y_train.values), (x_val.values, y_val.values), (x_test.values, y_test.values)
