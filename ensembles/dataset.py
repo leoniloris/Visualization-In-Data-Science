@@ -55,4 +55,21 @@ def split_train_val_test(x, y, train_perc):
     (x_val, y_val), (x_test, y_test) = \
         _split_sets(x_valtest, y_valtest, 0.5)
 
-    return (x_train.values, y_train.values), (x_val.values, y_val.values), (x_test.values, y_test.values)
+    return (x_train.values, y_train.values), \
+            (x_val.values, y_val.values), \
+            (x_test.values, y_test.values)
+
+def split_train_val_test_sup_unsup(x, y, train_perc):
+    (x_train_sup, y_train_sup), (x_valtest, y_valtest) = \
+        _split_sets(x, y, train_perc)
+
+    (x_val, y_val), (x_test, y_test) = \
+        _split_sets(x_valtest, y_valtest, 0.5)
+
+    (x_train_unsup, y_train_unsup) = (x_train_sup[y_train_sup.diagnosis == 'B'],
+                                      y_train_sup[y_train_sup.diagnosis == 'B'])
+
+    return (x_train_sup.values, y_train_sup.values), \
+            (x_train_unsup.values, y_train_unsup.values), \
+            (x_val.values, y_val.values), \
+            (x_test.values, y_test.values)
