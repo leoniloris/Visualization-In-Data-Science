@@ -19,8 +19,8 @@ def load_dataset():
 def create_xy(df, add_columns, target_columns):
     columns = [
         col for col in df.columns if
-        (col not in target_columns and
-        add_columns in col)
+        (col not in target_columns and 
+         any(add in col for add in add_columns))
     ]
 
     return df[columns], df[target_columns]
