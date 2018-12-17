@@ -1,13 +1,13 @@
 import pandas as pd
 import numpy as np
 import os
+from sklearn.preprocessing import StandardScaler
 
 np.random.seed(0)
 
 
 def preprocess_data(df):
-    df /= df.max(axis=0)
-    return df
+    return pd.DataFrame(StandardScaler().fit_transform(df), columns=df.columns)
 
 
 def load_dataset():
