@@ -56,8 +56,9 @@ def split_train_val_test(x, y, train_perc):
         _split_sets(x_valtest, y_valtest, 0.5)
 
     return (x_train.values, y_train.values), \
-            (x_val.values, y_val.values), \
-            (x_test.values, y_test.values)
+        (x_val.values, y_val.values), \
+        (x_test.values, y_test.values)
+
 
 def split_train_val_test_sup_unsup(x, y, train_perc):
     (x_train_sup, y_train_sup), (x_valtest, y_valtest) = \
@@ -70,6 +71,17 @@ def split_train_val_test_sup_unsup(x, y, train_perc):
                                       y_train_sup[y_train_sup.diagnosis == 'B'])
 
     return (x_train_sup.values, y_train_sup.values), \
-            (x_train_unsup.values, y_train_unsup.values), \
-            (x_val.values, y_val.values), \
-            (x_test.values, y_test.values)
+        (x_train_unsup.values, y_train_unsup.values), \
+        (x_val.values, y_val.values), \
+        (x_test.values, y_test.values)
+
+
+def plot_confusion_matrix(cm, classes):
+    '''
+    usage: plot_confusion_matrix(confusion_matrix(outliers_idx, real_outliers_idx), [False, True])
+    '''
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
