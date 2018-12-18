@@ -4,8 +4,7 @@ import os
 import itertools
 import matplotlib.pyplot as plt
 
-np.random.seed(0)
-
+np.random.seed(3)
 
 def preprocess_data(df):
     df /= df.max(axis=0)
@@ -62,18 +61,26 @@ def split_train_val_test(x, y, train_perc):
         (x_test.values, y_test.values)
 
 
-def split_train_val_test_sup_unsup(x, y, train_perc):
-    (x_train_sup, y_train_sup), (x_valtest, y_valtest) = \
-        _split_sets(x, y, train_perc)
+def split_train_val_test_sup(x, y, train_perc):
+    x_healthy, y_healthy = x[y.diagnosis == 'B'], y[y.diagnosis == 'B']
+    x_unhealthy, y_unhealthy = x[y.diagnosis == 'M'], y[y.diagnosis == 'M']
+
+    (x_train_h, y_train_h), (x_valtest_h, y_valtest_h) = \
+        _split_sets(x_healthy, y_healthy, train_perc)
+
+    (x_train_u, y_train_u), (x_valtest_u, y_valtest_u) = \
+        _split_sets(x_unhealthy, y_unhealthy, train_perc / 6)
+
+    x_train = pd.concat([x_train_h, x_train_u], ignore_index=True)
+    y_train = pd.concat([y_train_h, y_train_u], ignore_index=True)
+
+    x_valtest = pd.concat([x_valtest_h, x_valtest_u], ignore_index=True)
+    y_valtest = pd.concat([y_valtest_h, y_valtest_u], ignore_index=True)
 
     (x_val, y_val), (x_test, y_test) = \
         _split_sets(x_valtest, y_valtest, 0.5)
 
-    (x_train_unsup, y_train_unsup) = (x_train_sup[y_train_sup.diagnosis == 'B'],
-                                      y_train_sup[y_train_sup.diagnosis == 'B'])
-
-    return (x_train_sup.values, y_train_sup.values), \
-        (x_train_unsup.values, y_train_unsup.values), \
+    return (x_train.values, y_train.values), \
         (x_val.values, y_val.values), \
         (x_test.values, y_test.values)
 
@@ -88,7 +95,7 @@ def plot_confusion_matrix(cm, classes):
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
 
-    thresh = cm.max() / 2.
+    thresh = 1 / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(j, i, format(cm[i, j], '.2f'),
                  horizontalalignment="center",
