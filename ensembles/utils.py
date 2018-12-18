@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.preprocessing import StandardScaler
+import itertools
+import matplotlib.pyplot as plt
 
 np.random.seed(0)
 
 
 def preprocess_data(df):
-    return pd.DataFrame(StandardScaler().fit_transform(df), columns=df.columns)
+    df /= df.max(axis=0)
+    return df
 
 
 def load_dataset():
@@ -85,3 +87,13 @@ def plot_confusion_matrix(cm, classes):
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
+
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], '.2f'),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
